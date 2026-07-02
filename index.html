@@ -8,6 +8,9 @@
   <script src="https://cdn.jsdelivr.net/gh/MozillaReality/ammo.js@8bbc0ea/builds/ammo.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@c-frame/aframe-physics-system@4.2.4/dist/aframe-physics-system.min.js"></script>
   <script src="https://unpkg.com/aframe-look-at-component@0.8.0/dist/aframe-look-at-component.min.js"></script>
+  
+  <!-- Add the extra component that handles GLTF animations for mods -->
+  <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.0.0/dist/aframe-extras.min.js"></script>
 
   <script src="js/physics.js"></script>
   <script src="js/movement.js"></script>
@@ -28,17 +31,12 @@
 
     <!-- THE REINFORCED COLOSSEUM -->
     <a-entity id="colosseum-map">
-      <!-- THE THICK FLOOR: 10 meters deep so nothing clips through -->
-      <a-box position="0 -5 0" width="50" height="10" depth="50" color="#d2b48c" 
-             ammo-body="type: static; friction: 0.8" ammo-shape="type: box"></a-box>
-      
-      <!-- Walls -->
+      <a-box position="0 -5 0" width="50" height="10" depth="50" color="#d2b48c" ammo-body="type: static; friction: 0.8" ammo-shape="type: box"></a-box>
       <a-box position="0 2 -25" width="50" height="5" depth="1" color="#8b7355" ammo-body="type: static" ammo-shape="type: box"></a-box>
       <a-box position="0 2 25" width="50" height="5" depth="1" color="#8b7355" ammo-body="type: static" ammo-shape="type: box"></a-box> 
       <a-box position="-25 2 0" width="1" height="5" depth="50" color="#8b7355" ammo-body="type: static" ammo-shape="type: box"></a-box>
       <a-box position="25 2 0" width="1" height="5" depth="50" color="#8b7355" ammo-body="type: static" ammo-shape="type: box"></a-box>
 
-      <!-- Pillars -->
       <a-cylinder position="-15 2.5 -15" radius="1" height="6" color="#a09080" ammo-body="type: static" ammo-shape="type: cylinder"></a-cylinder>
       <a-cylinder position="15 2.5 -15" radius="1" height="6" color="#a09080" ammo-body="type: static" ammo-shape="type: cylinder"></a-cylinder>
       <a-cylinder position="-15 2.5 15" radius="1" height="6" color="#a09080" ammo-body="type: static" ammo-shape="type: cylinder"></a-cylinder>
@@ -49,23 +47,25 @@
 
     <!-- Player Rig -->
     <a-entity id="player-rig" position="0 0 0" player-movement>
+      
+      <!-- Placeholder Full Body (Follows the camera via movement.js) -->
+      <a-cylinder id="full-body-mesh" radius="0.3" height="1.4" color="#444" position="0 0.7 0" opacity="0.8"></a-cylinder>
+
       <a-camera id="head" position="0 1.6 0" look-controls="pointerLockEnabled: true" wasd-controls="acceleration: 20">
         <a-entity id="pc-cursor" cursor="rayOrigin: entity" raycaster="objects: .clickable" 
                   geometry="primitive: ring; radiusInner: 0.01; radiusOuter: 0.02" 
                   position="0 0 -1" material="color: white; shader: flat" opacity="0.5"></a-entity>
       </a-camera>
 
-      <a-entity id="left-hand" laser-controls="hand: left" raycaster="objects: .clickable"
-                ammo-body="type: kinematic" ammo-shape="type: sphere; fit: manual; sphereRadius: 0.08" visible="false"></a-entity>
-      <a-entity id="right-hand" laser-controls="hand: right" raycaster="objects: .clickable"
-                ammo-body="type: kinematic" ammo-shape="type: sphere; fit: manual; sphereRadius: 0.08" visible="false"></a-entity>
+      <a-entity id="left-hand" laser-controls="hand: left" raycaster="objects: .clickable" ammo-body="type: kinematic" ammo-shape="type: sphere; fit: manual; sphereRadius: 0.08" visible="false"></a-entity>
+      <a-entity id="right-hand" laser-controls="hand: right" raycaster="objects: .clickable" ammo-body="type: kinematic" ammo-shape="type: sphere; fit: manual; sphereRadius: 0.08" visible="false"></a-entity>
     </a-entity>
 
     <!-- Starter Sword -->
     <a-box id="starter-sword" class="clickable" color="silver"
            depth="0.8" height="0.05" width="0.1" position="0 1.5 -3"
            ammo-body="type: dynamic; mass: 5" ammo-shape="type: box"
-           combat-weapon="name: The Buster; type: sword; vrGrabMode: force;">
+           combat-weapon="name: The Buster; type: sword; vrGrabMode: force; pcHoldPos: 0.4 -0.3 -0.6">
         <a-text class="hover-text" value="The Buster" align="center" position="0 0.3 0" scale="0.5 0.5 0.5" visible="false" color="lime" look-at="#head"></a-text>
     </a-box>
   </a-scene>
