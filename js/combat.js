@@ -6,8 +6,12 @@ AFRAME.registerComponent('combat-weapon', {
     vrGrabMode: { type: 'string', default: 'force' }, 
     vrGripPos: { type: 'vec3', default: {x: 0, y: 0, z: 0} }, 
     vrGripRot: { type: 'vec3', default: {x: 0, y: 0, z: 0} },
-    pcHoldPos: { type: 'vec3', default: {x: 0.4, y: -0.3, z: -0.7} },
+    
+    // FPS View Coordinates (Bottom right, pointing forward)
+    pcHoldPos: { type: 'vec3', default: {x: 0.4, y: -0.3, z: -0.6} },
     pcHoldRot: { type: 'vec3', default: {x: 0, y: 0, z: 0} },
+    
+    // Fallback procedural swing
     swingRot: { type: 'vec3', default: {x: -60, y: 45, z: -45} } 
   },
 
@@ -17,27 +21,19 @@ AFRAME.registerComponent('combat-weapon', {
     this.hoverText = this.el.querySelector('.hover-text');
     
     this.el.addEventListener('mouseenter', () => {
-      if (!this.data.isHeld && this.hoverText) {
-        this.hoverText.setAttribute('visible', 'true');
-      }
+      if (!this.data.isHeld && this.hoverText) this.hoverText.setAttribute('visible', 'true');
     });
 
     this.el.addEventListener('mouseleave', () => {
-      if (this.hoverText) {
-        this.hoverText.setAttribute('visible', 'false');
-      }
+      if (this.hoverText) this.hoverText.setAttribute('visible', 'false');
     });
     
     this.el.addEventListener('click', (evt) => {
-      if (!this.data.isHeld) {
-        this.equipWeapon(evt.detail.cursorEl);
-      }
+      if (!this.data.isHeld) this.equipWeapon(evt.detail.cursorEl);
     });
 
     document.querySelector('a-scene').addEventListener('mousedown', () => {
-      if (this.data.isHeld && this.mode === 'pc') {
-        this.triggerAction();
-      }
+      if (this.data.isHeld && this.mode === 'pc') this.triggerAction();
     });
   },
 
@@ -55,6 +51,8 @@ AFRAME.registerComponent('combat-weapon', {
       this.mode = 'pc';
       this.el.removeAttribute('ammo-body'); 
       this.camera.appendChild(this.el);
+      
+      // Snaps to FPS camera view
       this.el.setAttribute('position', this.data.pcHoldPos);
       this.el.setAttribute('rotation', this.data.pcHoldRot);
     }
@@ -62,30 +60,32 @@ AFRAME.registerComponent('combat-weapon', {
 
   triggerAction: function() {
     if (this.data.type === 'sword') {
-      this.el.removeAttribute('animation__swing'); 
-      this.el.setAttribute('animation__swing', {
-        property: 'rotation',
-        to: `${this.data.swingRot.x} ${this.data.swingRot.y} ${this.data.swingRot.z}`,
-        dur: 150,          
-        dir: 'alternate',  
-        loop: 1,
-        easing: 'easeInQuad'
-      });
+      
+      // MOD ANIMATION OVERRIDE CHECK
+      // If the weapon has an animation-mixer (which plays .glb animations), use it
+      if (this.el.hasAttribute('animation-mixer')) {
+        this.el.setAttribute('animation-mixer', 'clip: Swing; loop: once; timeScale: 1.5');
+      } else {
+        // FALLBACK: Procedural A-Frame Rotation
+        this.el.removeAttribute('animation__swing'); 
+        this.el.setAttribute('animation__swing', {
+          property: 'rotation',
+          to: `${this.data.swingRot.x} ${this.data.swingRot.y} ${this.data.swingRot.z}`,
+          dur: 150,          
+          dir: 'alternate',  
+          loop: 1,
+          easing: 'easeInQuad'
+        });
+      }
     }
   },
 
-  // NEW: The Anti-Clip Abyss Rescue
   tick: function () {
     if (!this.data.isHeld && this.el.body) {
       let currentPos = this.el.object3D.position;
-      
-      // If the sword falls below the floor (0), rescue it!
       if (currentPos.y < 0) {
-        // Strip physics, move it up 0.5 meters, re-apply physics
         this.el.removeAttribute('ammo-body');
         this.el.setAttribute('position', {x: currentPos.x, y: 0.5, z: currentPos.z});
-        
-        // Slight delay to let the teleport register before turning gravity back on
         setTimeout(() => {
           this.el.setAttribute('ammo-body', 'type: dynamic; mass: 5');
         }, 50);
