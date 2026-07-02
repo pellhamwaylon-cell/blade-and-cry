@@ -5,15 +5,10 @@
   <title>Blade and Cry</title>
   
   <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
-  
-  <!-- Physics Engine (Standard JS version) -->
   <script src="https://cdn.jsdelivr.net/gh/MozillaReality/ammo.js@8bbc0ea/builds/ammo.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@c-frame/aframe-physics-system@4.2.4/dist/aframe-physics-system.min.js"></script>
-  
-  <!-- UI Look-At script (Needed for the hover text to face the camera) -->
   <script src="https://unpkg.com/aframe-look-at-component@0.8.0/dist/aframe-look-at-component.min.js"></script>
 
-  <!-- Game Scripts -->
   <script src="js/physics.js"></script>
   <script src="js/movement.js"></script>
   <script src="js/game.js"></script>
@@ -29,37 +24,30 @@
   </div>
 
   <a-scene physics="driver: ammo; debug: false;" webxr="referenceSpaceType: local-floor">
-    
-    <!-- A nice sky to make it feel open -->
     <a-sky color="#87CEEB"></a-sky>
 
-    <!-- ========================================== -->
-    <!-- THE COLOSSEUM MAP (Built with Primitives)  -->
-    <!-- ========================================== -->
+    <!-- THE REINFORCED COLOSSEUM -->
     <a-entity id="colosseum-map">
-      <!-- THE FLOOR (Made into a thick box so swords don't fall through) -->
-      <a-box position="0 -0.5 0" width="40" height="1" depth="40" color="#d2b48c" 
+      <!-- THE THICK FLOOR: 10 meters deep so nothing clips through -->
+      <a-box position="0 -5 0" width="50" height="10" depth="50" color="#d2b48c" 
              ammo-body="type: static; friction: 0.8" ammo-shape="type: box"></a-box>
       
-      <!-- ARENA WALLS (Static Physics Bounds) -->
-      <a-box position="0 2 -20" width="40" height="5" depth="1" color="#8b7355" ammo-body="type: static" ammo-shape="type: box"></a-box> <!-- North Wall -->
-      <a-box position="0 2 20" width="40" height="5" depth="1" color="#8b7355" ammo-body="type: static" ammo-shape="type: box"></a-box>  <!-- South Wall -->
-      <a-box position="-20 2 0" width="1" height="5" depth="40" color="#8b7355" ammo-body="type: static" ammo-shape="type: box"></a-box> <!-- West Wall -->
-      <a-box position="20 2 0" width="1" height="5" depth="40" color="#8b7355" ammo-body="type: static" ammo-shape="type: box"></a-box>  <!-- East Wall -->
+      <!-- Walls -->
+      <a-box position="0 2 -25" width="50" height="5" depth="1" color="#8b7355" ammo-body="type: static" ammo-shape="type: box"></a-box>
+      <a-box position="0 2 25" width="50" height="5" depth="1" color="#8b7355" ammo-body="type: static" ammo-shape="type: box"></a-box> 
+      <a-box position="-25 2 0" width="1" height="5" depth="50" color="#8b7355" ammo-body="type: static" ammo-shape="type: box"></a-box>
+      <a-box position="25 2 0" width="1" height="5" depth="50" color="#8b7355" ammo-body="type: static" ammo-shape="type: box"></a-box>
 
-      <!-- DECORATIVE PILLARS -->
+      <!-- Pillars -->
       <a-cylinder position="-15 2.5 -15" radius="1" height="6" color="#a09080" ammo-body="type: static" ammo-shape="type: cylinder"></a-cylinder>
       <a-cylinder position="15 2.5 -15" radius="1" height="6" color="#a09080" ammo-body="type: static" ammo-shape="type: cylinder"></a-cylinder>
       <a-cylinder position="-15 2.5 15" radius="1" height="6" color="#a09080" ammo-body="type: static" ammo-shape="type: cylinder"></a-cylinder>
       <a-cylinder position="15 2.5 15" radius="1" height="6" color="#a09080" ammo-body="type: static" ammo-shape="type: cylinder"></a-cylinder>
       
-      <!-- A Stone Pedestal for the Sword -->
       <a-box position="0 0 -3" width="1.5" height="1" depth="1.5" color="#555" ammo-body="type: static" ammo-shape="type: box"></a-box>
     </a-entity>
-    <!-- ========================================== -->
 
-
-    <!-- Player Rig with Movement Support -->
+    <!-- Player Rig -->
     <a-entity id="player-rig" position="0 0 0" player-movement>
       <a-camera id="head" position="0 1.6 0" look-controls="pointerLockEnabled: true" wasd-controls="acceleration: 20">
         <a-entity id="pc-cursor" cursor="rayOrigin: entity" raycaster="objects: .clickable" 
@@ -69,26 +57,17 @@
 
       <a-entity id="left-hand" laser-controls="hand: left" raycaster="objects: .clickable"
                 ammo-body="type: kinematic" ammo-shape="type: sphere; fit: manual; sphereRadius: 0.08" visible="false"></a-entity>
-                
       <a-entity id="right-hand" laser-controls="hand: right" raycaster="objects: .clickable"
                 ammo-body="type: kinematic" ammo-shape="type: sphere; fit: manual; sphereRadius: 0.08" visible="false"></a-entity>
     </a-entity>
 
-    <!-- The Starter Sword (Resting on the pedestal) -->
+    <!-- Starter Sword -->
     <a-box id="starter-sword" class="clickable" color="silver"
            depth="0.8" height="0.05" width="0.1" position="0 1.5 -3"
            ammo-body="type: dynamic; mass: 5" ammo-shape="type: box"
-           combat-weapon="
-              name: The Buster;
-              type: sword; 
-              vrGrabMode: force; 
-              pcHoldPos: 0.3 -0.2 -0.6; 
-              vrGripPos: 0 -0.1 0;
-              vrGripRot: 90 0 0">
-              
+           combat-weapon="name: The Buster; type: sword; vrGrabMode: force;">
         <a-text class="hover-text" value="The Buster" align="center" position="0 0.3 0" scale="0.5 0.5 0.5" visible="false" color="lime" look-at="#head"></a-text>
     </a-box>
-
   </a-scene>
 </body>
 </html>
