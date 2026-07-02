@@ -72,5 +72,24 @@ AFRAME.registerComponent('combat-weapon', {
         easing: 'easeInQuad'
       });
     }
+  },
+
+  // NEW: The Anti-Clip Abyss Rescue
+  tick: function () {
+    if (!this.data.isHeld && this.el.body) {
+      let currentPos = this.el.object3D.position;
+      
+      // If the sword falls below the floor (0), rescue it!
+      if (currentPos.y < 0) {
+        // Strip physics, move it up 0.5 meters, re-apply physics
+        this.el.removeAttribute('ammo-body');
+        this.el.setAttribute('position', {x: currentPos.x, y: 0.5, z: currentPos.z});
+        
+        // Slight delay to let the teleport register before turning gravity back on
+        setTimeout(() => {
+          this.el.setAttribute('ammo-body', 'type: dynamic; mass: 5');
+        }, 50);
+      }
+    }
   }
 });
