@@ -3,70 +3,61 @@
 <head>
   <meta charset="UTF-8">
   <title>WebXR Combat Engine</title>
-  <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
-  <script src="https://mixedreality.mozilla.org/ammo.js/builds/ammo.wasm.js"></script>
-  <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-physics-system@v4.2.2/dist/aframe-physics-system.min.js"></script>
-
-  <!-- Load your custom engine logic -->
-  <script src="js/physics.js"></script>
-  <script src="js/avatar.js"></script>
-  <script src="js/game.js"></script>
   
-  <style>
-    body { margin: 0; font-family: monospace; }
-    #ui-layer { position: absolute; top: 20px; left: 20px; z-index: 999; background: rgba(0,0,0,0.8); color: lime; padding: 20px; border: 1px solid lime; }
-    button { background: #222; color: white; border: 1px solid #555; padding: 10px; cursor: pointer; }
-    button:hover { background: #444; }
-  </style>
+  <!-- A-Frame Core -->
+  <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+  
+  <!-- Fixed: Working Ammo.js & Physics System -->
+  <script src="https://mixedreality.mozilla.org/ammo.js/builds/ammo.wasm.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@c-frame/aframe-physics-system@4.2.4/dist/aframe-physics-system.min.js"></script>
+
+  <!-- Your Game Scripts -->
+  <script src="js/physics.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/combat.js"></script>
+  
+  <!-- UI Styling -->
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <!-- 2D UI for PC / Pre-VR setup -->
+  <!-- The 2D UI for PC Mode -->
   <div id="ui-layer">
     <h2>WebXR Engine <span id="mode-badge">[PC MODE]</span></h2>
     <button onclick="spawnWeapon()">Spawn Heavy Sword</button>
     <button onclick="loadMap('arena')">Load Arena</button>
   </div>
 
-  <a-scene physics="driver: ammo; debug: false" webxr="referenceSpaceType: local-floor">
+  <a-scene physics="driver: ammo; debug: false;" webxr="referenceSpaceType: local-floor">
     
-    <a-assets>
-      <!-- Drop your .glb files in an assets folder. Using primitives as placeholders. -->
-      <a-mixin id="heavy-metal" ammo-body="type: dynamic; mass: 10" weapon-weight="stiffness: 0.2"></a-mixin>
-    </a-assets>
+    <!-- Environment -->
+    <a-plane ammo-body="type: static" ammo-shape="type: box" rotation="-90 0 0" width="20" height="20" color="#333"></a-plane>
 
-    <!-- The Environment -->
-    <a-entity id="world">
-      <a-plane ammo-body="type: static" ammo-shape="type: box" rotation="-90 0 0" width="20" height="20" color="#333"></a-plane>
-    </a-entity>
-
-    <!-- The Player Rig (Auto-swaps between PC and VR) -->
+    <!-- The Player Rig -->
     <a-entity id="player-rig" position="0 0 0">
       
-      <!-- PC Camera / VR Headset Tracker -->
+      <!-- PC Camera -->
       <a-camera id="head" position="0 1.6 0" look-controls="pointerLockEnabled: true">
-        <!-- PC Crosshair (Disables automatically in VR) -->
         <a-entity id="pc-cursor" cursor="rayOrigin: entity" raycaster="objects: .clickable" 
                   geometry="primitive: ring; radiusInner: 0.01; radiusOuter: 0.02" 
                   position="0 0 -1" material="color: white; shader: flat" opacity="0.5"></a-entity>
       </a-camera>
 
-      <!-- VR Controllers (Laser pointers & Physics Hands) -->
+      <!-- VR Controllers -->
       <a-entity id="left-hand" laser-controls="hand: left" raycaster="objects: .clickable"
-                ammo-body="type: kinematic" ammo-shape="type: sphere; fit: manual; sphereRadius: 0.08"
-                visible="false"></a-entity>
+                ammo-body="type: kinematic" ammo-shape="type: sphere; fit: manual; sphereRadius: 0.08" visible="false"></a-entity>
                 
       <a-entity id="right-hand" laser-controls="hand: right" raycaster="objects: .clickable"
-                ammo-body="type: kinematic" ammo-shape="type: sphere; fit: manual; sphereRadius: 0.08"
-                visible="false"></a-entity>
-
-      <!-- Full Body Avatar (Follows the head and hands) -->
-      <a-entity id="character-model" full-body-ik="head: #head; leftHand: #left-hand; rightHand: #right-hand"
-                gltf-model="url(assets/your-character.glb)" visible="false"></a-entity>
+                ammo-body="type: kinematic" ammo-shape="type: sphere; fit: manual; sphereRadius: 0.08" visible="false"></a-entity>
     </a-entity>
 
-    <!-- A test weapon you can grab -->
-    <a-box id="test-sword" class="clickable" mixin="heavy-metal" depth="0.8" height="0.1" width="0.1" position="0 1 -1" color="silver"></a-box>
+    <!-- Test Sword (Click it to equip!) -->
+    <a-box class="clickable" color="silver"
+           depth="0.8" height="0.05" width="0.1" position="0 1 -2"
+           ammo-body="type: dynamic; mass: 5" ammo-shape="type: box"
+           weapon-weight="stiffness: 0.2"
+           combat-weapon="type: sword; pcHoldPos: 0.3 -0.2 -0.6">
+    </a-box>
 
   </a-scene>
 </body>
