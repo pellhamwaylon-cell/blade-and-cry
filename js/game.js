@@ -28,19 +28,29 @@ document.addEventListener("DOMContentLoaded", () => {
 window.spawnWeapon = function() {
   const scene = document.querySelector('a-scene');
   const weapon = document.createElement('a-box');
+  
   weapon.setAttribute('class', 'clickable');
   weapon.setAttribute('color', 'gold');
-  weapon.setAttribute('depth', '1');
+  weapon.setAttribute('depth', '0.8');
   weapon.setAttribute('height', '0.05');
   weapon.setAttribute('width', '0.1');
   weapon.setAttribute('position', '0 2 -2');
   weapon.setAttribute('ammo-body', 'type: dynamic; mass: 10');
-  weapon.setAttribute('weapon-weight', 'stiffness: 0.2');
-  weapon.setAttribute('combat-weapon', 'type: sword; pcHoldPos: 0.3 -0.2 -0.6');
+  
+  // Set up the modder components for the spawned weapon
+  weapon.setAttribute('combat-weapon', 'name: Golden Blade; type: sword; vrGrabMode: force; pcHoldPos: 0.3 -0.2 -0.6');
+  
+  // Create hover text
+  const text = document.createElement('a-text');
+  text.setAttribute('class', 'hover-text');
+  text.setAttribute('value', 'Golden Blade');
+  text.setAttribute('align', 'center');
+  text.setAttribute('position', '0 0.2 0');
+  text.setAttribute('scale', '0.5 0.5 0.5');
+  text.setAttribute('visible', 'false');
+  text.setAttribute('color', 'gold');
+  text.setAttribute('look-at', '#head');
+  
+  weapon.appendChild(text);
   scene.appendChild(weapon);
-};
-
-window.loadMap = function(mapId) {
-  console.log(`Map loader triggered for: ${mapId}`);
-  alert("Map database connected! Ready for .glb injections.");
 };
