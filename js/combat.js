@@ -3,13 +3,9 @@ AFRAME.registerComponent('combat-weapon', {
     name: { type: 'string', default: 'Unknown Weapon' },
     type: { type: 'string', default: 'sword' }, 
     isHeld: { type: 'boolean', default: false },
-    
-    // VR Settings
-    vrGrabMode: { type: 'string', default: 'force' }, // 'force' (teleport) or 'physical' (bend down)
-    vrGripPos: { type: 'vec3', default: {x: 0, y: 0, z: 0} }, // Where the hand grips it
+    vrGrabMode: { type: 'string', default: 'force' }, 
+    vrGripPos: { type: 'vec3', default: {x: 0, y: 0, z: 0} }, 
     vrGripRot: { type: 'vec3', default: {x: 0, y: 0, z: 0} },
-    
-    // PC Settings
     pcHoldPos: { type: 'vec3', default: {x: 0.4, y: -0.3, z: -0.7} },
     pcHoldRot: { type: 'vec3', default: {x: 0, y: 0, z: 0} },
     swingRot: { type: 'vec3', default: {x: -60, y: 45, z: -45} } 
@@ -20,35 +16,24 @@ AFRAME.registerComponent('combat-weapon', {
     this.camera = document.querySelector('#head');
     this.hoverText = this.el.querySelector('.hover-text');
     
-    // Hover over weapon
     this.el.addEventListener('mouseenter', () => {
       if (!this.data.isHeld && this.hoverText) {
         this.hoverText.setAttribute('visible', 'true');
       }
     });
 
-    // Look away from weapon
     this.el.addEventListener('mouseleave', () => {
       if (this.hoverText) {
         this.hoverText.setAttribute('visible', 'false');
       }
     });
     
-    // Pick up weapon
     this.el.addEventListener('click', (evt) => {
       if (!this.data.isHeld) {
-        // If physical mode is on, check distance to controller
-        if (this.el.sceneEl.is('vr-mode') && this.data.vrGrabMode === 'physical') {
-           // Logic to ensure hand is physically close would go here
-           this.equipWeapon(evt.detail.cursorEl);
-        } else {
-           // Force grab (teleport to hand/screen)
-           this.equipWeapon(evt.detail.cursorEl);
-        }
+        this.equipWeapon(evt.detail.cursorEl);
       }
     });
 
-    // Swing weapon on PC
     document.querySelector('a-scene').addEventListener('mousedown', () => {
       if (this.data.isHeld && this.mode === 'pc') {
         this.triggerAction();
@@ -62,9 +47,8 @@ AFRAME.registerComponent('combat-weapon', {
 
     if (this.el.sceneEl.is('vr-mode')) {
       this.mode = 'vr';
-      this.el.removeAttribute('ammo-body'); // Optional: replace with physics joints later
+      this.el.removeAttribute('ammo-body'); 
       handEl.appendChild(this.el);
-      // Apply modder's custom grip offset
       this.el.setAttribute('position', this.data.vrGripPos);
       this.el.setAttribute('rotation', this.data.vrGripRot);
     } else {
