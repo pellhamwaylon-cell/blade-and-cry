@@ -1,33 +1,34 @@
 AFRAME.registerComponent('player-movement', {
   init: function () {
+    this.rig = this.el;
+    this.headLevel = document.querySelector('#head-level');
+    this.bodyMesh = document.querySelector('#body-mesh');
     this.camera = document.querySelector('#head');
-    this.bodyMesh = document.querySelector('#full-body-mesh'); // The placeholder body
     
     this.isCrouching = false;
     this.standHeight = 1.6;
     this.crouchHeight = 0.8;
-    this.targetHeight = this.standHeight; // Where the camera WANTS to be
+    this.targetHeight = this.standHeight;
     this.currentHeight = this.standHeight;
     
-    this.baseSpeed = 20;
-    this.sprintSpeed = 50; 
+    this.baseSpeed = 0.15;
+    this.sprintSpeed = 0.35;
     
     this.yVelocity = 0;
     this.isJumping = false;
     this.gravity = 0.01;
 
     window.addEventListener('keydown', (e) => {
-      if (e.key === 'Shift') {
-        this.camera.setAttribute('wasd-controls', `acceleration: ${this.sprintSpeed}`);
-      }
+      // Sprint
+      if (e.key === 'Shift') this.rig.setAttribute('movement-controls', `speed: ${this.sprintSpeed}`);
       
-      // CROUCH: Toggle target height
+      // Crouch Toggle
       if ((e.key === 'c' || e.key === 'C') && !this.isCrouching) {
         this.targetHeight = this.crouchHeight;
         this.isCrouching = true;
       }
 
-      // JUMP: Only jump if we are on the ground (velocity is 0)
+      // Jump (Only if not crouching or already jumping)
       if (e.key === ' ' && !this.isJumping && !this.isCrouching) {
         this.isJumping = true;
         this.yVelocity = 0.15; 
@@ -35,10 +36,7 @@ AFRAME.registerComponent('player-movement', {
     });
 
     window.addEventListener('keyup', (e) => {
-      if (e.key === 'Shift') {
-        this.camera.setAttribute('wasd-controls', `acceleration: ${this.baseSpeed}`);
-      }
-      
+      if (e.key === 'Shift') this.rig.setAttribute('movement-controls', `speed: ${this.baseSpeed}`);
       if (e.key === 'c' || e.key === 'C') {
         this.targetHeight = this.standHeight;
         this.isCrouching = false;
@@ -47,38 +45,40 @@ AFRAME.registerComponent('player-movement', {
   },
 
   tick: function () {
-    let pos = this.camera.getAttribute('position');
-
-    // 1. SMOOTH CROUCHING (Lerp)
-    // Moves 15% of the distance to the target height every frame
+    // 1. Smooth Lerp
     this.currentHeight += (this.targetHeight - this.currentHeight) * 0.15;
 
-    // 2. JUMPING & GRAVITY
-    if (this.isJumping) {
-      this.yVelocity -= this.gravity; 
-    }
-
-    // Apply heights
+    // 2. Jump Physics
+    if (this.isJumping) this.yVelocity -= this.gravity;
     let finalY = this.currentHeight + this.yVelocity;
 
-    // Hit the ground
     if (finalY <= this.currentHeight) {
       finalY = this.currentHeight;
       this.isJumping = false;
       this.yVelocity = 0;
     }
 
-    pos.y = finalY;
-    this.camera.setAttribute('position', pos);
+    // 3. Apply ONLY to Head Level (Fixes Teleport Bug!)
+    this.headLevel.setAttribute('position', `0 ${finalY} 0`);
 
-    // 3. SYNC FULL BODY MESH
-    // Keeps the torso underneath the camera, but rotates with it
+    // 4. Procedural Body Sync & Squish
     if (this.bodyMesh) {
-      let camRot = this.camera.getAttribute('rotation');
-      // Position the body slightly lower than the eyes
-      this.bodyMesh.setAttribute('position', `${pos.x} ${pos.y - 0.7} ${pos.z}`);
-      // Only sync the Y-axis rotation (yaw) so the body doesn't tilt when you look up/down
-      this.bodyMesh.setAttribute('rotation', `0 ${camRot.y} 0`);
+      let crouchRatio = finalY / this.standHeight; 
+      
+      // Torso & Arms move down
+      document.querySelector('#torso').setAttribute('position', `0 ${finalY - 0.6} 0`);
+      document.querySelector('#arm-l').setAttribute('position', `-0.28 ${finalY - 0.6} 0`);
+      document.querySelector('#arm-r').setAttribute('position', `0.28 ${finalY - 0.6} 0`);
+      
+      // Legs squish
+      document.querySelector('#leg-l').setAttribute('scale', `1 ${crouchRatio} 1`);
+      document.querySelector('#leg-r').setAttribute('scale', `1 ${crouchRatio} 1`);
+      document.querySelector('#leg-l').setAttribute('position', `-0.12 ${(0.7 * crouchRatio) / 2} 0`);
+      document.querySelector('#leg-r').setAttribute('position', `0.12 ${(0.7 * crouchRatio) / 2} 0`);
+
+      // Match body rotation to camera yaw
+      let camY = this.camera.getAttribute('rotation').y;
+      this.bodyMesh.setAttribute('rotation', `0 ${camY} 0`);
     }
   }
 });
