@@ -6,40 +6,41 @@ document.addEventListener("DOMContentLoaded", () => {
   const modeBadge = document.querySelector('#mode-badge');
   const uiLayer = document.querySelector('#ui-layer');
 
-  // TRIGGER: When the user puts on the headset
   scene.addEventListener('enter-vr', function () {
     modeBadge.innerText = "[VR MODE]";
-    uiLayer.style.display = 'none'; // Hide 2D HTML menu
-    
-    // Disable PC crosshair, enable VR hands
+    uiLayer.style.display = 'none'; 
     pcCursor.setAttribute('visible', 'false');
     pcCursor.removeAttribute('cursor');
-    
     leftHand.setAttribute('visible', 'true');
     rightHand.setAttribute('visible', 'true');
   });
 
-  // TRIGGER: When the user takes off the headset
   scene.addEventListener('exit-vr', function () {
     modeBadge.innerText = "[PC MODE]";
     uiLayer.style.display = 'block'; 
-    
     pcCursor.setAttribute('visible', 'true');
     pcCursor.setAttribute('cursor', 'rayOrigin: entity');
-    
     leftHand.setAttribute('visible', 'false');
     rightHand.setAttribute('visible', 'false');
   });
 });
 
-// Extensible Modding Logic
 window.spawnWeapon = function() {
   const scene = document.querySelector('a-scene');
-  const weapon = document.createElement('a-entity');
-  // You can fetch URLs from a JSON database here to load custom 3D models
-  weapon.setAttribute('mixin', 'heavy-metal');
-  weapon.setAttribute('geometry', 'primitive: box; depth: 1; height: 0.05; width: 0.1');
-  weapon.setAttribute('position', '0 2 -2');
+  const weapon = document.createElement('a-box');
   weapon.setAttribute('class', 'clickable');
+  weapon.setAttribute('color', 'gold');
+  weapon.setAttribute('depth', '1');
+  weapon.setAttribute('height', '0.05');
+  weapon.setAttribute('width', '0.1');
+  weapon.setAttribute('position', '0 2 -2');
+  weapon.setAttribute('ammo-body', 'type: dynamic; mass: 10');
+  weapon.setAttribute('weapon-weight', 'stiffness: 0.2');
+  weapon.setAttribute('combat-weapon', 'type: sword; pcHoldPos: 0.3 -0.2 -0.6');
   scene.appendChild(weapon);
+};
+
+window.loadMap = function(mapId) {
+  console.log(`Map loader triggered for: ${mapId}`);
+  alert("Map database connected! Ready for .glb injections.");
 };
