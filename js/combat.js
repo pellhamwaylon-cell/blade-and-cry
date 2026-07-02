@@ -6,18 +6,11 @@ AFRAME.registerComponent('combat-weapon', {
     vrGrabMode: { type: 'string', default: 'force' }, 
     vrGripPos: { type: 'vec3', default: {x: 0, y: 0, z: 0} }, 
     vrGripRot: { type: 'vec3', default: {x: 0, y: 0, z: 0} },
-    
-    // FPS View Coordinates (Bottom right, pointing forward)
-    pcHoldPos: { type: 'vec3', default: {x: 0.4, y: -0.3, z: -0.6} },
-    pcHoldRot: { type: 'vec3', default: {x: 0, y: 0, z: 0} },
-    
-    // Fallback procedural swing
     swingRot: { type: 'vec3', default: {x: -60, y: 45, z: -45} } 
   },
 
   init: function () {
     this.mode = 'pc'; 
-    this.camera = document.querySelector('#head');
     this.hoverText = this.el.querySelector('.hover-text');
     
     this.el.addEventListener('mouseenter', () => {
@@ -50,23 +43,22 @@ AFRAME.registerComponent('combat-weapon', {
     } else {
       this.mode = 'pc';
       this.el.removeAttribute('ammo-body'); 
-      this.camera.appendChild(this.el);
       
-      // Snaps to FPS camera view
-      this.el.setAttribute('position', this.data.pcHoldPos);
-      this.el.setAttribute('rotation', this.data.pcHoldRot);
+      // Connect specifically to the Grip Anchor
+      let pcGrip = document.querySelector('#pc-grip');
+      pcGrip.appendChild(this.el);
+      
+      // Zero out coordinates since the anchor is already positioned perfectly
+      this.el.setAttribute('position', '0 0 0');
+      this.el.setAttribute('rotation', '0 0 0');
     }
   },
 
   triggerAction: function() {
     if (this.data.type === 'sword') {
-      
-      // MOD ANIMATION OVERRIDE CHECK
-      // If the weapon has an animation-mixer (which plays .glb animations), use it
       if (this.el.hasAttribute('animation-mixer')) {
         this.el.setAttribute('animation-mixer', 'clip: Swing; loop: once; timeScale: 1.5');
       } else {
-        // FALLBACK: Procedural A-Frame Rotation
         this.el.removeAttribute('animation__swing'); 
         this.el.setAttribute('animation__swing', {
           property: 'rotation',
